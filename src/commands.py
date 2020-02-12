@@ -1,5 +1,7 @@
 import os
 import io
+import argparse
+import re
 
 
 def echo(args, input_text=""):
@@ -36,6 +38,7 @@ def wc(args, input_text=""):
     :param input_text: used if files=[]
     :return: lines words bytes filename
     """
+
     def simple_wc(file):
         with open(file, "r") as input:
             lines = input.readlines()
@@ -57,6 +60,66 @@ def wc(args, input_text=""):
         for file in args:
             answer += simple_wc(file)
         return answer
+
+
+def grep(args, input_text=""):
+    """
+    searches all lines in file(s) which contain a match to a regular expression
+    options:
+    -i: case ignoring
+    -w: search only matches that form whole word
+    -A n: prints n lines after line with found match
+    :param args: keys, pattern, filenames
+    :param input_text: used as search area if no filenames was provided
+    :return: result string
+    """
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", help="case ignoring", action="store_true", default=False)
+    parser.add_argument("-w", help="full words only", action="store_true", default=False)
+    parser.add_argument("-A", help="prints n lines after matching line", type=int, default=0)
+    parser.add_argument("regexp", help="regular expression", type=str)
+    parser.add_argument("files", help="file", type=str, nargs="*")
+    args = parser.parse_args(args)
+    regexp = args.regexp
+    files = args.files
+    if files == []:
+        texts = [input_text.split("\n")]
+    else:
+        texts = []
+        for file in files:
+            f = open(file, "r")
+            texts.append(f.read().split('\n'))
+
+    def find_in_string(s):
+        """
+        searches match in string accordingly to all options
+        """
+        ms = re.findall(regexp, s, flags=re.IGNORECASE if args.i else 0)
+        return any([ms != []] if not args.w else [m.find(' ') == -1 for m in ms])
+
+    def matching(text):
+        """
+        returns output for one text (from one file)
+        """
+        ans = []
+        for i, line in enumerate(text):
+            if find_in_string(line):
+                if args.A == 0:
+                    ans.append(line + "\n")
+                else:
+                    ans.append("\n".join(text[i:i + args.A + 1]) + "\n\n")
+        return ans
+
+    if len(texts) == 1:
+        return "".join(matching(texts[0]))
+    else:
+        ans = ""
+        for text, file in zip(texts, files):
+            m = matching(text)
+            if not m:
+                continue
+            ans += file + ":\n" + "".join(m)
+        return ans
 
 
 def pwd(args, input_text=""):

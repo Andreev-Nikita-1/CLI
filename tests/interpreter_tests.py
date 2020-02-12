@@ -21,8 +21,13 @@ class TestInterpreter(unittest.TestCase):
         self.assertEqual("1 1 4\n", perform(parse("echo 123 | wc")))
 
     def test_cat_file(self):
-        file = tempfile.NamedTemporaryFile("w")
+        file = tempfile.NamedTemporaryFile("w", delete=False)
         file.write("abc\n123")
         file.flush()
         add_value("x", file.name)
         self.assertEqual("abc\n123", perform(parse("cat $x")))
+        file.close()
+        os.unlink(file.name)
+
+    def test_echo_pipe_grep(self):
+        self.assertEqual("1234\n", perform(parse("echo 1234 | grep 23")))

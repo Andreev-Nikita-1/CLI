@@ -26,7 +26,7 @@ class TestTokenize(unittest.TestCase):
         self.assertEqual(['echo 3 \"|\" wc'], tokenize("echo 3 \"|\" wc", "\|"))
 
     def test_double_quotes_disrespect(self):
-        self.assertEqual(['echo 3 \"', '\" wc'], tokenize("echo 3 \"|\" wc", "\|", double_quotes_respect=False))
+        self.assertEqual(['echo 3 "', '" wc'], tokenize("echo 3 \"|\" wc", "\|", double_quotes_respect=False))
 
 
 class TestInsertVars(unittest.TestCase):

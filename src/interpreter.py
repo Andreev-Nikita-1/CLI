@@ -22,7 +22,8 @@ def get_command(args):
         "cat": cat,
         "wc": wc,
         "pwd": pwd,
-        "exit": exit_
+        "exit": exit_,
+        "grep": grep
     }
     if first in builtins.keys():
         return BuiltInCommand(builtins[first], args[1:])
@@ -31,16 +32,28 @@ def get_command(args):
 
 
 class Command:
+    """
+    abstract class with 'launch' method
+    """
+
     def launch(self, input_text):
         raise NotImplementedError
 
 
 class EmptyCommand(Command):
+    """
+    my empty command just re-sends its input
+    """
+
     def launch(self, input_text):
         return input_text
 
 
 class AssignmentCommand(Command):
+    """
+    assigns a value to a variable when launches
+    """
+
     def __init__(self, name, value):
         self.name = name
         self.value = value
@@ -51,6 +64,10 @@ class AssignmentCommand(Command):
 
 
 class BuiltInCommand(Command):
+    """
+    run a builtin command when launches
+    """
+
     def __init__(self, command_function, args):
         self.function = command_function
         self.args = args
@@ -60,6 +77,10 @@ class BuiltInCommand(Command):
 
 
 class ExternalCommand(Command):
+    """
+    run an external command when launches
+    """
+
     def __init__(self, args):
         self.args = args
 
@@ -82,4 +103,5 @@ def perform(commands_parts):
             input_text = command.launch(input_text)
         except Exception as e:
             print(e)
+            break
     return input_text
