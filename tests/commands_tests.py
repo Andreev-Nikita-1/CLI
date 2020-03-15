@@ -83,12 +83,14 @@ AbC DeF
 
     def test_full_words(self):
         file = tempfile.NamedTemporaryFile("w", delete=False)
-        file.write("""abc def
-ABC DEF
-AbC_DeF""")
+        file.write("""notword
+word
+also word
+""")
         file.flush()
-        self.assertEqual("""AbC_DeF
-""", grep(["-i", "-w", "c.d", file.name]))
+        self.assertEqual("""word
+also word
+""", grep(["-i", "-w", "wo.d", file.name]))
         file.close()
         os.unlink(file.name)
 
@@ -109,30 +111,28 @@ line 4""")
 1 line
 2 line
 3 line
-
+--------
 abc 2
 line 1
 line 2
 line 3
-
 """, grep(["-A", "3", "abc", file.name]))
         file.close()
         os.unlink(file.name)
 
     def test_two_files(self):
         file = tempfile.NamedTemporaryFile("w", delete=False)
-        file.write("""abc
-AXC
-A C
+        file.write("""abc 1
+ABC 2
 """)
         file.flush()
         file2 = tempfile.NamedTemporaryFile("w", delete=False)
-        file2.write("""a_c
-a__c
+        file2.write("""ABC 1
+abc 2
 """)
         file2.flush()
-        self.assertEqual(file.name + ":\nabc\nAXC\n" + file2.name + ":\na_c\n",
-                         grep(["-i", "-w", "a.c", file.name, file2.name]))
+        self.assertEqual(file.name + ":\nabc 1\n" + file2.name + ":\nabc 2\n",
+                         grep(["abc", file.name, file2.name]))
         file.close()
         file2.close()
         os.unlink(file.name)

@@ -94,20 +94,39 @@ def grep(args, input_text=""):
         """
         searches match in string accordingly to all options
         """
-        ms = re.findall(regexp, s, flags=re.IGNORECASE if args.i else 0)
-        return any([ms != []] if not args.w else [m.find(' ') == -1 for m in ms])
+        if args.w:
+            regexp1 = r"\b" + regexp + r"\b"
+        else:
+            regexp1 = regexp
+        ms = re.findall(regexp1, s, flags=re.IGNORECASE if args.i else 0)
+        return ms != []
 
     def matching(text):
         """
         returns output for one text (from one file)
         """
         ans = []
+        inds = [0] * len(text)
         for i, line in enumerate(text):
             if find_in_string(line):
-                if args.A == 0:
-                    ans.append(line + "\n")
-                else:
-                    ans.append("\n".join(text[i:i + args.A + 1]) + "\n\n")
+                inds[i] = 1
+        if args.A != 0:
+            for i in range(len(inds)):
+                for k in range(1, args.A + 1):
+                    if i + k < len(inds) and inds[i] == 1:
+                        inds[i + k] = 2
+            for i in range(1, len(inds)):
+                if inds[i] == 0 and inds[i - 1] > 0 and inds[i:].__contains__(1):
+                    inds[i] = -1
+            for i in range(len(inds)):
+                if inds[i] > 0:
+                    ans.append(text[i] + "\n")
+                elif inds[i] == -1:
+                    ans.append("--------" + "\n")
+        else:
+            for i in range(len(inds)):
+                if inds[i] == 1:
+                    ans.append(text[i] + "\n")
         return ans
 
     if len(texts) == 1:
