@@ -79,7 +79,12 @@ def grep(args, input_text=""):
     parser.add_argument("-A", help="prints n lines after matching line", type=int, default=0)
     parser.add_argument("regexp", help="regular expression", type=str)
     parser.add_argument("files", help="file", type=str, nargs="*")
-    args = parser.parse_args(args)
+    try:
+        args = parser.parse_args(args)
+        if args.A < 0:
+            return "A must be positive"
+    except:
+        return ""
     regexp = args.regexp
     files = args.files
     if files == []:
